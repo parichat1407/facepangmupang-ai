@@ -2,6 +2,7 @@
 import { useState, useRef, ChangeEvent, DragEvent } from 'react';
 import { Sparkles, Upload, ScanFace, ChevronDown, ArrowUpRight, ShieldCheck, Menu, X, SlidersHorizontal, RotateCcw, ArrowRight, Check, Camera, Trash2, CircleHelp, MoveHorizontal, ScanLine } from 'lucide-react';
 import { AreaChart, Area, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, Radar } from 'recharts';
+import Chatbot from '@/components/Chatbot';
 
 type Tab = 'Overview' | 'Face blueprint' | 'Face reading';
 const proportions = [{ subject: 'Eyes', value: 78 }, { subject: 'Nose', value: 84 }, { subject: 'Lips', value: 70 }, { subject: 'Chin', value: 74 }, { subject: 'Jawline', value: 81 }, { subject: 'Forehead', value: 76 }];
@@ -31,6 +32,7 @@ export default function Home() {
   <section className="life-section section-pad" id="about"><div className="section-heading"><div><span className="eyebrow">BEYOND THE MIRROR</span><h2>Good things start <em>with you.</em></h2></div><p>Your face doesn’t determine your future. Here are a few real-world places to put your energy.</p></div><div className="life-grid">{[['✳','Personal style','Try a new makeup look, find a flattering haircut, or play with a color that feels like you.'],['↗','Career & craft','Build a portfolio, practice a skill, or find a new way to share your work.'],['⌁','Money & goals','Make a simple spending plan, start saving, or set one small financial goal.'],['♡','Connection','Listen openly, communicate clearly, and let confidence grow at your own pace.']].map(([icon,title,desc])=><div className="life-card" key={title}><span>{icon}</span><h4>{title}</h4><p>{desc}</p><ArrowUpRight size={15}/></div>)}</div><p className="choice-note">Exploring a change to your appearance is a personal choice. It doesn’t define your worth or determine what life brings.</p></section>
   <section className="faq-disclaimer" id="privacy"><div className="disclaimer-mark"><ShieldCheck size={22}/></div><div><span className="eyebrow">A NOTE ON CARE & CONTEXT</span><h3>Curiosity, with <em>care.</em></h3><p>Proportion analysis is an estimate from an image and has accuracy limits. Simulations are conceptual illustrations, not guarantees of real procedure outcomes. Decisions about treatments or surgery should be discussed with a qualified medical professional.</p><p>Face reading is a cultural belief, not science. It cannot predict the future or establish a person’s personality, character, or potential. Appearance is never a measure of personal value.</p><div className="disclaimer-links"><a href="#privacy">Privacy policy <ArrowUpRight size={13}/></a><a href="#about">How we think about AI <ArrowUpRight size={13}/></a></div></div><div className="disclaimer-side">YOUR PHOTO<br/>IS YOURS.<span>✳</span><small>LOCAL DEMO · NO STORAGE</small></div></section>
   <footer><a className="brand footer-brand" href="#home"><AppIcon/><span>facepang<span className="brand-light">mupang</span><sup> AI</sup></span></a><span>Made with care, for the face you’re in.</span><span>© 2026 FACEPANGMUPANG AI</span></footer>
+  <Chatbot />
  </main>;
 }
 
