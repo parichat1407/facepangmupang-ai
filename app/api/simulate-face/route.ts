@@ -103,7 +103,8 @@ export async function POST(request: Request) {
       : 'Reshape the facial features of the person in this photo to show a cosmetic surgery result.',
     `Strength: ${LEVEL_WORDS[level]}. The listed features must visibly change shape:`,
     ...changes,
-    'Everything else stays the same: same person, age, skin tone and texture, hairstyle, expression, head pose, lighting, background, clothing and framing.',
+    // Don't tell the model to keep what the selected edit has to change (mouth corners are part of the expression, the hairline part of the hairstyle).
+    `Everything else stays the same: same person, age, skin tone and texture, ${ids.includes('forehead') ? 'hairstyle apart from the hairline' : 'hairstyle'}, ${ids.includes('mouth-corners') ? 'expression apart from the mouth corners' : 'expression'}, head pose, lighting, background, clothing and framing.`,
     'No makeup, no filters, no skin smoothing. Photorealistic.',
   ].join('\n');
 

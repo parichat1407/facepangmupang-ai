@@ -47,7 +47,7 @@ const RULES: Rule[] = [
       procedure: { th: 'ฟิลเลอร์หรือเติมไขมันหน้าผากให้โค้งมนเต็ม', en: 'Forehead filler or fat grafting for a fuller, rounded forehead' },
       beliefGain: { th: 'ตำราเชื่อว่าหน้าผากเต็ม มน สว่าง ช่วยเสริมดวงการงาน การเรียน และแรงสนับสนุนจากผู้ใหญ่', en: 'Tradition holds that a full, rounded, bright forehead supports career, study and help from mentors.' },
       nonSurgical: { th: 'เปิดหน้าผาก เลี่ยงหน้าม้าหนาทึบ ไฮไลต์กลางหน้าผาก และเพิ่มวอลุ่มที่โคนผม', en: 'Show your forehead, avoid heavy bangs, highlight its centre and add root volume.' },
-      simPrompt: 'a slightly fuller, smoothly rounded forehead that looks a little higher',
+      simPrompt: 'a taller, fuller forehead with a smooth, gently convex curve; move the hairline up so the forehead is visibly higher',
     },
   },
   {
@@ -159,7 +159,7 @@ const RULES: Rule[] = [
       procedure: { th: 'เสริมจมูก (เสริมสัน) หรือฟิลเลอร์สันจมูก', en: 'Rhinoplasty (bridge augmentation) or nose-bridge filler' },
       beliefGain: { th: 'ตำราเชื่อว่าสันจมูกตรง สูงพอดี ไม่มีข้อปุ่ม เป็น “เสาค้ำทรัพย์” ช่วยเสริมการเงินและความมั่นคงช่วงวัยกลางคน', en: 'A straight, moderately high, smooth bridge is believed to be a “pillar of wealth” supporting mid-life finances.' },
       nonSurgical: { th: 'คอนทัวร์สองข้างสันจมูก และไฮไลต์กลางสันจมูกเป็นเส้นตรง', en: 'Contour both sides of the bridge and draw a straight highlight down the centre.' },
-      simPrompt: 'a slightly higher, straighter, smoother nasal bridge, keeping the nose tip natural',
+      simPrompt: 'a higher, straighter, narrower nasal bridge: one clean straight line from between the eyebrows down to the tip, with a light highlight along the bridge and soft shadow on both sides; keep the nose tip natural',
     },
   },
   {
@@ -228,7 +228,7 @@ const RULES: Rule[] = [
       procedure: { th: 'โบท็อกซ์ปรับมุมปาก หรือฟิลเลอร์มุมปาก', en: 'Botox to the mouth-corner depressors or corner filler' },
       beliefGain: { th: 'ตำราเชื่อว่ามุมปากยกขึ้นเหมือนเรือหงาย (ปากกระจับ) ช่วยเสริมเสน่ห์ เมตตามหานิยม และความสุข', en: 'Corners lifted like a boat are believed to bring charm, goodwill and happiness.' },
       nonSurgical: { th: 'คอนซีลเลอร์ใต้มุมปาก ลิปไลเนอร์ยกมุมขึ้นเล็กน้อย และฝึกยิ้มมุมปาก', en: 'Conceal under the corners, lift them slightly with liner and practise a soft smile.' },
-      simPrompt: 'mouth corners lifted very slightly into a gentle, relaxed upturn',
+      simPrompt: 'both mouth corners turned up instead of down, so the closed lips form a gentle upward curve like a soft resting smile',
     },
   },
   {
