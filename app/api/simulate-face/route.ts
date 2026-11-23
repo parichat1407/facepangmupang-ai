@@ -2,14 +2,14 @@ import { NextResponse } from 'next/server';
 import { generateImage, generateText, NoImageGeneratedError } from 'ai';
 import { SIM_PROMPTS } from '@/lib/face/reading-rules';
 import { COMPARE_MODELS, compareEnabled, isLanguageImageModel } from '@/lib/sim-models';
-import { FLUX_DEV_ID, fluxKontextDevEdit, isReplicateModel, replicateConfigured, ReplicateError } from '@/lib/flux';
+import { fluxKontextDevEdit, isReplicateModel, replicateConfigured, ReplicateError } from '@/lib/flux';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
-// Default: open-weight FLUX.1 Kontext [dev] on Replicate when REPLICATE_API_TOKEN is set, else Seedream on AI Gateway.
+// Default: FLUX Kontext Pro (Black Forest Labs) on AI Gateway. FLUX.1 Kontext [dev] (Replicate) stays a compare-mode option.
 // flux-3, seedream-5.5 and nano banana need paid, non-free-tier gateway credits.
-const MODEL = process.env.SIMULATION_MODEL || (replicateConfigured() ? FLUX_DEV_ID : 'bytedance/seedream-4.0');
+const MODEL = process.env.SIMULATION_MODEL || 'bfl/flux-kontext-pro';
 const MAX_IMAGE_B64 = 3_500_000; // ~2.6 MB JPEG; client sends ≤1024px so this is generous.
 const LEVEL_WORDS = { natural: 'very subtle, barely noticeable', balanced: 'moderate but natural-looking', defined: 'clearly visible yet realistic' } as const;
 type Level = keyof typeof LEVEL_WORDS;

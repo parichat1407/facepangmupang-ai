@@ -6,7 +6,7 @@
 2. **Side profile (optional)** — upload or self-timer camera; 10 points are traced on the person silhouette (MediaPipe selfie segmenter, plus the face landmarker as a hint) and can be dragged. Measures nasofrontal / nasolabial / nasofacial angles, facial convexity, tip projection, E-line, forehead slope (`lib/face/profile.ts`).
 3. **Face blueprint** — real proportions from the mesh: symmetry, facial thirds, feature ratios, face shape (`lib/face/measure.ts`).
 4. **โหงวเฮ้ง** — traditional reading for 9 areas, plus the points tradition says could enhance the reading if adjusted, what is usually done and how it helps (`lib/face/reading-rules.ts`).
-5. **AI simulation** — the selected points are sent with a downsized photo (after a separate consent) to an image-editing model (`app/api/simulate-face`). The default is the open-weight **FLUX.1 Kontext [dev]** from Black Forest Labs, run on Replicate (`lib/flux.ts`); Vercel AI Gateway models are the fallback and the compare-mode options.
+5. **AI simulation** — the selected points are sent with a downsized photo (after a separate consent) to an image-editing model (`app/api/simulate-face`). The default is **FLUX Kontext Pro** (`bfl/flux-kontext-pro`, Black Forest Labs) via Vercel AI Gateway. The open-weight **FLUX.1 Kontext [dev]** on Replicate (`lib/flux.ts`) is available in compare mode.
 6. **Not ready for surgery?** — makeup, hair and clothing advice for the current face shape and features (`lib/face/style-rules.ts`).
 7. **Optional Claude summary** — a personal summary written from rule results only, never the photo (`app/api/face-reading`), and a chatbot inside the โหงวเฮ้ง section that answers about the visitor's own reading (`app/api/chat`).
 
@@ -18,9 +18,9 @@ Face reading is presented as cultural belief, never as science or medical advice
 2. `npm install`
 3. Copy `.env.example` to `.env.local` and fill in what you need:
    - `ANTHROPIC_API_KEY` — chatbot + personal summary (hidden when missing).
-   - `REPLICATE_API_TOKEN` — enables FLUX.1 Kontext [dev] (open-weight) as the default simulation model, about $0.025 per image. Replicate deletes API inputs and outputs after about an hour.
-   - `AI_GATEWAY_API_KEY` — simulation images (on Vercel, OIDC is used automatically). Model: `SIMULATION_MODEL` (default `bytedance/seedream-4.0`, about $0.03 per image; `bfl/flux-kontext-pro` at about $0.04 is the other option. Newer models such as `bfl/flux-3-image`, `bytedance/seedream-5.5` and Nano Banana need paid gateway credits; free-tier credits are refused).
-   - **Compare mode** runs the same photo through FLUX.1 Kontext [dev] (Replicate), Seedream 4.0, FLUX Kontext Pro, FLUX 3, Seedream 5.5 and Nano Banana 2.1 (about $0.17 per run; list in `lib/sim-models.ts`). It is on automatically in `npm run dev`. In production it stays off unless you set `NEXT_PUBLIC_SIM_COMPARE=1`.
+   - `REPLICATE_API_TOKEN` — optional; enables FLUX.1 Kontext [dev] (open-weight) in compare mode, about $0.025 per image. Replicate deletes API inputs and outputs after about an hour.
+   - `AI_GATEWAY_API_KEY` — simulation images (on Vercel, OIDC is used automatically). Model: `SIMULATION_MODEL` (default `bfl/flux-kontext-pro`, about $0.04 per image and works on free-tier credits; `bytedance/seedream-4.0` at about $0.03 is the other option. Newer models such as `bfl/flux-3-image`, `bytedance/seedream-5.5` and Nano Banana need paid gateway credits; free-tier credits are refused).
+   - **Compare mode** runs the same photo through FLUX Kontext Pro, FLUX.1 Kontext [dev] (Replicate), Seedream 4.0, FLUX 3, Seedream 5.5 and Nano Banana 2.1 (about $0.17 per run; list in `lib/sim-models.ts`). It is on automatically in `npm run dev`. In production it stays off unless you set `NEXT_PUBLIC_SIM_COMPARE=1`.
 4. `npm run dev` → http://localhost:3000
 
 The camera needs `localhost` or HTTPS — plain `http://<LAN-IP>` won't allow it on phones.
