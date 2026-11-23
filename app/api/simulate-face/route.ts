@@ -2,12 +2,14 @@ import { NextResponse } from 'next/server';
 import { generateImage, generateText, NoImageGeneratedError } from 'ai';
 import { SIM_PROMPTS } from '@/lib/face/reading-rules';
 import { COMPARE_MODELS, compareEnabled, isLanguageImageModel } from '@/lib/sim-models';
+import { FLUX_DEV_ID, fluxKontextDevEdit, isReplicateModel, replicateConfigured, ReplicateError } from '@/lib/flux';
 
 export const runtime = 'nodejs';
 export const maxDuration = 120;
 
+// Default: open-weight FLUX.1 Kontext [dev] on Replicate when REPLICATE_API_TOKEN is set, else Seedream on AI Gateway.
 // flux-3, seedream-5.5 and nano banana need paid, non-free-tier gateway credits.
-const MODEL = process.env.SIMULATION_MODEL || 'bytedance/seedream-4.0';
+const MODEL = process.env.SIMULATION_MODEL || (replicateConfigured() ? FLUX_DEV_ID : 'bytedance/seedream-4.0');
 const MAX_IMAGE_B64 = 3_500_000; // ~2.6 MB JPEG; client sends ≤1024px so this is generous.
 const LEVEL_WORDS = { natural: 'very subtle, barely noticeable', balanced: 'moderate but natural-looking', defined: 'clearly visible yet realistic' } as const;
 type Level = keyof typeof LEVEL_WORDS;
@@ -30,6 +32,7 @@ function bytedanceSize(width: number, height: number): `${number}x${number}` | u
 
 /** Image models go through generateImage; Gemini image models are language models and return images as files. */
 async function editImage(model: string, prompt: string, image: string, abortSignal: AbortSignal, dims: { width: number; height: number }) {
+  if (isReplicateModel(model)) return fluxKontextDevEdit(image, prompt, abortSignal);
   if (isLanguageImageModel(model)) {
     const result = await generateText({
       model,
@@ -57,9 +60,6 @@ export async function POST(request: Request) {
   try { body = await request.json(); } catch { return NextResponse.json({ error: 'Invalid JSON request.' }, { status: 400 }); }
 
   const lang = body.lang === 'en' ? 'en' : 'th';
-  if (!process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
-    return NextResponse.json({ error: msg(lang, 'ยังไม่ได้ตั้งค่า AI Gateway (AI_GATEWAY_API_KEY) จึงสร้างภาพจำลองไม่ได้', 'AI Gateway is not configured (AI_GATEWAY_API_KEY), so simulations are unavailable.') }, { status: 503 });
-  }
   if (typeof body.image !== 'string' || body.image.length < 100 || body.image.length > MAX_IMAGE_B64 || !/^[A-Za-z0-9+/=]+$/.test(body.image)) {
     return NextResponse.json({ error: msg(lang, 'รูปไม่ถูกต้องหรือใหญ่เกินไป', 'The image is missing, invalid or too large.') }, { status: 400 });
   }
@@ -78,6 +78,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: msg(lang, 'ไม่รองรับโมเดลนี้', 'This model is not available.') }, { status: 403 });
     }
     model = body.model;
+  }
+  if (isReplicateModel(model) ? !replicateConfigured() : !process.env.AI_GATEWAY_API_KEY && !process.env.VERCEL_OIDC_TOKEN) {
+    return NextResponse.json({
+      error: isReplicateModel(model)
+        ? msg(lang, 'ยังไม่ได้ตั้งค่า REPLICATE_API_TOKEN จึงใช้ FLUX.1 Kontext [dev] ไม่ได้', 'REPLICATE_API_TOKEN is not set, so FLUX.1 Kontext [dev] is unavailable.')
+        : msg(lang, 'ยังไม่ได้ตั้งค่า AI Gateway (AI_GATEWAY_API_KEY) จึงสร้างภาพจำลองไม่ได้', 'AI Gateway is not configured (AI_GATEWAY_API_KEY), so simulations are unavailable.'),
+    }, { status: 503 });
   }
 
   const changes = ids.map(id => `- ${SIM_PROMPTS[id]}`);
@@ -99,6 +106,18 @@ export async function POST(request: Request) {
     return NextResponse.json({ image: out.base64, mediaType: out.mediaType, model, ms: Date.now() - started });
   } catch (err) {
     console.error('simulate-face failed', model, err instanceof Error ? err.message : err);
+    if (err instanceof ReplicateError) {
+      const status = err.code === 'credits' ? 402 : err.code === 'rate' ? 429 : err.code === 'timeout' ? 504 : 502;
+      const text = {
+        auth: msg(lang, 'REPLICATE_API_TOKEN ไม่ถูกต้อง', 'The Replicate token is invalid.'),
+        credits: msg(lang, 'บัญชี Replicate ไม่มีเครดิต กรุณาเติมเงินที่ replicate.com/account/billing', 'The Replicate account has no credit. Top up at replicate.com/account/billing.'),
+        rate: msg(lang, 'มีผู้ใช้จำนวนมาก ลองใหม่อีกสักครู่', 'Too many requests. Please try again shortly.'),
+        timeout: msg(lang, 'สร้างภาพนานเกินไป ลองใหม่อีกครั้ง', 'The simulation took too long. Please try again.'),
+        blocked: msg(lang, 'ผู้ให้บริการไม่สร้างภาพนี้ ลองเลือกจุดอื่นหรือใช้รูปอื่น', 'The provider did not return an image. Try other points or another photo.'),
+        failed: msg(lang, 'สร้างภาพจำลองไม่สำเร็จ กรุณาลองใหม่อีกครั้ง', 'Could not create the simulation. Please try again.'),
+      }[err.code];
+      return NextResponse.json({ error: text, ...(err.code === 'credits' ? { code: 'credits' } : {}) }, { status });
+    }
     const blocked = NoImageGeneratedError.isInstance(err) || err instanceof NoImageReturned;
     // The gateway refuses some models on free-tier credits; say so instead of a generic failure.
     const detail = err instanceof Error ? `${err.message} ${String((err as { cause?: unknown }).cause ?? '')}` : '';

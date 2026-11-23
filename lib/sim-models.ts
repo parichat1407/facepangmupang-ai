@@ -1,6 +1,7 @@
-/** Image-editing models offered in compare mode (prices from AI Gateway at ~1024px, Nov 2026). */
+/** Image-editing models offered in compare mode (prices at ~1024px, Nov 2026; the FLUX dev entry runs on Replicate, the rest on AI Gateway). */
 export const COMPARE_MODELS = [
-  { id: 'bytedance/seedream-4.0', label: 'Seedream 4.0', maker: 'ByteDance', price: 0.03 }, // site default
+  { id: 'replicate/flux-kontext-dev', label: 'FLUX.1 Kontext [dev]', maker: 'Black Forest Labs (open-weight, Replicate)', price: 0.025 }, // default when REPLICATE_API_TOKEN is set
+  { id: 'bytedance/seedream-4.0', label: 'Seedream 4.0', maker: 'ByteDance', price: 0.03 }, // fallback default
   { id: 'bfl/flux-kontext-pro', label: 'FLUX Kontext Pro', maker: 'Black Forest Labs', price: 0.04 }, // works on free-tier credits
   { id: 'bfl/flux-3-image', label: 'FLUX 3', maker: 'Black Forest Labs', price: 0.048 },
   { id: 'bytedance/seedream-5.5', label: 'Seedream 5.5', maker: 'ByteDance', price: 0.02 },
