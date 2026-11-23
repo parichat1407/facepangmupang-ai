@@ -11,7 +11,15 @@ export const maxDuration = 120;
 // flux-3, seedream-5.5 and nano banana need paid, non-free-tier gateway credits.
 const MODEL = process.env.SIMULATION_MODEL || 'bfl/flux-kontext-pro';
 const MAX_IMAGE_B64 = 3_500_000; // ~2.6 MB JPEG; client sends ≤1024px so this is generous.
-const LEVEL_WORDS = { natural: 'very subtle, barely noticeable', balanced: 'moderate but natural-looking', defined: 'clearly visible yet realistic' } as const;
+// Kontext-style editors keep the source almost untouched unless the edit is stated plainly, so even
+// "natural" must ask for a change that is visible side by side. Strength lives here, not in SIM_PROMPTS.
+const LEVEL_WORDS = {
+  natural: 'a subtle but clearly visible change when the before and after are compared side by side',
+  balanced: 'a clearly noticeable change, like a typical cosmetic procedure result',
+  defined: 'a strong, obvious change that is still anatomically realistic',
+} as const;
+/** SIM_PROMPTS say "slightly" for the reading text; drop it so LEVEL_WORDS alone sets the strength. */
+const toEdit = (text: string) => text.replace(/\b(very )?slightly\s*/gi, '').replace(/\s{2,}/g, ' ').trim();
 type Level = keyof typeof LEVEL_WORDS;
 
 const msg = (lang: string, th: string, en: string) => (lang === 'en' ? en : th);
@@ -87,16 +95,16 @@ export async function POST(request: Request) {
     }, { status: 503 });
   }
 
-  const changes = ids.map(id => `- ${SIM_PROMPTS[id]}`);
+  const changes = ids.map(id => `- Change to: ${toEdit(SIM_PROMPTS[id])}`);
   if (note) changes.push(`- Additional request from the person (apply only if it is a cosmetic facial change): "${note}"`);
   const prompt = [
     body.view === 'side'
-      ? 'Edit this side-profile portrait photo of the same person to visualise a cosmetic facial change, keeping the exact side-profile angle.'
-      : 'Edit this portrait photo of the same person to visualise a cosmetic facial change.',
-    `Apply only these changes, ${LEVEL_WORDS[level]}:`,
+      ? 'Reshape the facial features of the person in this side-profile photo to show a cosmetic surgery result, keeping the exact side-profile angle.'
+      : 'Reshape the facial features of the person in this photo to show a cosmetic surgery result.',
+    `Strength: ${LEVEL_WORDS[level]}. The listed features must visibly change shape:`,
     ...changes,
-    'Keep the person clearly recognisable: same identity, age, skin tone and texture, hairstyle, expression, head pose, lighting, background, clothing and camera framing.',
-    'Do not add makeup, filters, beautification or any other changes. Photorealistic result.',
+    'Everything else stays the same: same person, age, skin tone and texture, hairstyle, expression, head pose, lighting, background, clothing and framing.',
+    'No makeup, no filters, no skin smoothing. Photorealistic.',
   ].join('\n');
 
   const started = Date.now();
